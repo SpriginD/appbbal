@@ -1,0 +1,102 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sınıf Listesi</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+
+    <style>
+        /* width */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+            background: rgb(80, 80, 80);
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            background: rgb(39, 39, 39);
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            display: flex;
+        }
+
+        body {
+            background: url('{% static "QuizApp/img/bg.jpg" %}') no-repeat fixed center;
+            background-size: cover;
+        }
+
+        .holder {
+            width: 84%;
+            height: 84%;
+            margin: auto;
+            background-color: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+
+        table {
+            opacity: .96;
+            border-radius: .3rem;
+            overflow: hidden;
+            border: collapse;
+            cursor: default;
+        }
+
+        .second-holder {
+            width: 100%;
+            height: 90%;
+            overflow: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid holder px-4 py-4 rounded rounded-3">
+        <h5 class="text-light ms-3 mt-2 mb-3">Student List of 12/E</h5>
+        <div class="table-responsive rounded rounded-3 second-holder">
+            {% if students %}
+            <table class="table table-borderless table-hover table-dark align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col" class="text-center py-3">No</th>
+                        <th scope="col" class="py-3">Name</th>
+                        <th scope="col" class="py-3">Last Name</th>
+                        <th scope="col" class="py-3">Durum</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <th scope="row" class="text-center">{{ student.student_number }}</th>
+                        <td>{{ student.student_name }}</td>
+                        <td>{{ student.student_surname }}</td>
+                        <td>{{ student.set_state }}</td>
+                        <td><a class="btn btn-primary btn-sm px-3 me-3 float-end fs-6"
+                                href="{% url 'QuizApp:student_results' student.id %}" role="button">Detay</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -1,0 +1,369 @@
+{% load tags %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail | {{ student.get_full_name }}</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    
+    <style>
+        body {
+            background: url("{% static 'QuizApp/img/bg.jpg' %}") no-repeat fixed center;
+            background-size: cover;
+        }
+
+        .holder {
+            width: 84%;
+            height: 84%;
+            margin-top: 5%;
+            background-color: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+
+        .row-eq-height {
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: -ms-flexbox;
+            display: flex;
+        }
+
+        .mh-268 {
+            min-height: 268px;
+        }
+
+        .box-shadow {
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+        }
+    </style>
+
+    <script src="{% static 'QuizApp/js/chart.js' %}"></script>
+    <script src="{% static 'QuizApp/js/rough.js' %}"></script>
+    <script src="{% static 'QuizApp/js/deferred.js' %}"></script>
+    <script src="{% static 'QuizApp/js/chartjs-plugin-rough.js' %}"></script>
+</head>
+
+<body>
+    <div class="container-fluid holder px-4 py-4 rounded rounded-3">
+        <div class="row" style="height: 10%; margin: 0;">
+            <h5 class="text-light ps-3 mt-2 mb-3">Student List of 12/E</h5>
+        </div>
+        <div class="row" style="height: 90%; margin: 0;">
+            <div class="card bg-dark text-white text-center box-shadow">
+                <!-- Card Header -->
+                <div class="card-header">
+                    <ul class="nav nav-pills nav-fill flex-column flex-md-row" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="btn btn-dark border-0 mx-3 px-4"
+                                href="{% url 'QuizApp:index' %}">Geri</a>
+                        </li>
+
+                        {% for quiz in quizzes %}
+                        {% if quiz.get_title == 'Birinci' %}
+                        <li class="nav-item">
+                            <a class="nav-link active" id="tab-{{  quiz.get_title|lower }}" data-bs-toggle="pill"
+                                href="#pills-{{ quiz.get_title|lower }}-quiz" role="tab"
+                                aria-controls="{{ quiz.get_title|lower }} Aria"
+                                aria-selected="true">{{ quiz.get_title }}
+                                Quiz</a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" id="tab-{{  quiz.get_title|lower }}" data-bs-toggle="pill"
+                                href="#pills-{{ quiz.get_title|lower }}-quiz" role="tab"
+                                aria-controls="{{  quiz.get_title|lower }} Aria"
+                                aria-selected="false">{{ quiz.get_title }}
+                                Quiz</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% for disable_quiz in disable_quizzes  %}
+                        <li class="nav-item">
+                            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">
+                                {{ quiz_names|index:disable_quiz }} </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body px-0 p-md-3">
+                    <div class="tab-content" id="pills-tabContent">
+                        {% if quizzes %}
+                        {% for quiz in quizzes %}
+                        {% if quiz.get_title == 'Birinci' %}
+                        <div class="tab-pane fade show px-0 p-md-3 active" id="pills-{{ quiz.get_title|lower }}-quiz"
+                            role="tabpanel" aria-labelledby="{{ quiz.get_title|lower }}-tab">
+                            {% else %}
+                            <div class="tab-pane fade px-0 p-md-3" id="pills-{{ quiz.get_title|lower }}-quiz"
+                                role="tabpanel" aria-labelledby="{{ quiz.get_title|lower }}-tab">
+                                {% endif %}
+                                <div class="container-fluid">
+                                    <div class="row row-eq-height rounded rounded-3 box-shadow px-2">
+                                        <div class="mh-268 col-lg-3 col-md-12 py-3">
+                                            <div class="card text-white bg-dark box-shadow h-100 mx-auto">
+                                                <div class="card-header">
+                                                    <h5 class="mt-2"> {{ student.get_full_name }} </h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Quiz Notu: {{ quiz.mark }}</h5>
+                                                    <hr>
+                                                    <p class="card-text">Quizin girilme tarihi :<br>{{quiz.last_date}}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mh-268 col-lg-5 col-md-12 py-3">
+                                            <div class="card text-white bg-dark box-shadow h-100 mx-auto">
+                                                <div class="card-body">
+                                                    {% if quiz.mark == 100 %}
+                                                    <h3>Kağıda da grafiğe de<br>bakmana ihtiyaç kalmadı :)</h3>
+                                                    {% else %}
+                                                    <div class="chart-container m-auto"
+                                                        style="position: relative; width: 100%; height: 100%;">
+                                                        <canvas id="QuizzesChart{{ quiz.which_quiz }}"
+                                                            data-url="{% url 'QuizApp:quizzes-chart' std_id=student.id quiz_id=quiz.which_quiz %}"
+                                                            aria-label="Quiz Score of {{ quiz.get_title }}"
+                                                            role="img"></canvas>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mh-268 col-lg-4 col-md-12 py-3">
+                                            <div class="card text-white bg-dark box-shadow h-100 mx-auto">
+                                                <div class="card-body">
+                                                    <div class="chart-container m-auto"
+                                                        style="position: relative; width: 100%; height: 100%;">
+                                                        <canvas id="avarageQuizzesChart{{ quiz.which_quiz }}"
+                                                            data-url="{% url 'QuizApp:avarage-quizzes-chart' quiz.which_quiz %}"
+                                                            aria-label="Avarage of {{ quiz.get_title }}"
+                                                            role="img"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="tab-pane fade show px-0 p-md-3 active" id="pills-no-quiz" role="tabpanel"
+                                aria-labelledby="no-tab">
+                                <div class="container-fluid">
+                                    <div class="row rounded rounded-3 box-shadow">
+                                        <div class="d-flex col-12 align-items-center justify-content-center">
+                                            <div class="card text-white bg-dark box-shadow"
+                                                style="width: 96%; height: 90%;">
+                                                <div class="card-header">
+                                                    <h3 class="mt-2"> {{ student.get_full_name }} </h3>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5 class="card-title">Henüz girilmiş bir notunuz bulunmamaktadır.
+                                                    </h5>
+                                                    <hr>
+                                                    <blockquote class="blockquote mt-5">
+                                                        <p>“The beautiful thing about learning is nobody can take it
+                                                            away from you.”</p>
+                                                        <footer class="blockquote-footer">B.B King<cite title="Wrote">
+                                                                the Composer</cite></footer>
+                                                    </blockquote>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Card Footer -->
+                    {% if quizzes %}
+                    <div class="card-footer text-muted">
+                        {{ student.get_last_date }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+        {% for quiz in quizzes %}
+        <script>
+            $(document).ready(function () {
+                Chart.defaults.global.defaultFontSize = 14;
+
+                {% if not quiz.mark == 100 %}
+                    var $quizzes_chart = $("#QuizzesChart{{ quiz.which_quiz }}");
+
+                    $.ajax({
+                        url: $quizzes_chart.data("url"),
+                        success: function (data) {
+                            var quizzes_chart = $quizzes_chart[0].getContext('2d');
+                            var config = {
+                                plugins: [ChartRough],
+                                type: 'doughnut',
+                                data: {
+                                    labels: data.quiz_labels,
+                                    datasets: [{
+                                        data: data.quiz_data,
+                                        borderAlign: 'inner',
+                                        backgroundColor: [
+                                            'rgba(54, 162, 235, 0.2)',
+                                            'rgba(255, 99, 132, 0.2)',
+                                            'rgba(255, 206, 86, 0.2)',
+                                        ],
+                                        borderColor: [
+                                            'rgba(54, 162, 235, 1)',
+                                            'rgba(255, 99, 132, 1)',
+                                            'rgba(255, 206, 86, 1)',
+                                        ],
+                                        borderWidth: 1,
+                                        rough: {
+                                            roughness: 0.5,
+                                            bowing: 1,
+                                            fillStyle: 'hachure',
+                                            fillWeight: 0.5,
+                                            hachureAngle: -41,
+                                            hachureGap: 1,
+                                            curveStepCount: 0,
+                                            simplification: 0
+                                        }
+                                    }]
+                                },
+                                options: {
+                                    title: {
+                                        display: true,
+                                        text: "Quiz Score Graph",
+                                        fontSize: 22,
+                                        fontColor: 'rgba(234, 234, 234, 1)',
+                                        padding: 0,
+                                    },
+                                    events: ['mousemove'],
+                                    layout: {
+                                        padding: {
+                                            left: 4,
+                                            right: 4,
+                                            top: 8,
+                                            bottom: 4
+                                        }
+                                    },
+                                    maintainAspectRatio: false,
+                                    cutoutPercentage: 40,
+                                    animation: {
+                                        animateScale: true
+                                    },
+                                    legend: {
+                                        labels: {
+                                            fontColor: 'rgba(220, 220, 220, 1)',
+                                        }
+                                    },
+                                    tooltips: {
+                                        callbacks: {
+                                            label: function (tooltipItem, data) {
+                                                var label = data.labels[tooltipItem.index] ||
+                                                    'a';
+
+                                                label = label.split(" ")[1];
+                                                return label;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            var myPieChart = new Chart(quizzes_chart, config);
+                        }
+                    });
+                {% endif %}
+
+                var $avarage_quizzes_chart = $("#avarageQuizzesChart{{ quiz.which_quiz }}");
+
+                $.ajax({
+                    url: $avarage_quizzes_chart.data("url"),
+                    success: function (data) {
+                        var avarage_quizzes_chart = $avarage_quizzes_chart[0].getContext('2d');
+                        var config = {
+                            plugins: [ChartRough],
+                            type: 'horizontalBar',
+                            data: {
+                                labels: data.students_labels,
+                                datasets: [{
+                                    label: "# Quiz Score",
+                                    data: data.students_data,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 2,
+                                    barThickness: 'flex',
+                                    rough: {
+                                        roughness: 0.25,
+                                        bowing: 1,
+                                        fillStyle: 'hachure',
+                                        fillWeight: 0.5,
+                                        hachureAngle: -41,
+                                        hachureGap: 1,
+                                        curveStepCount: 0,
+                                        simplification: 0
+                                    }
+                                }]
+                            },
+                            options: {
+                                title: {
+                                    display: true,
+                                    text: "Comparison Classroom",
+                                    fontSize: 22,
+                                    fontColor: 'rgba(234, 234, 234, 1)',
+                                    padding: 0,
+                                },
+                                events: ['mousemove'],
+                                layout: {
+                                    padding: 4
+                                },
+                                maintainAspectRatio: false,
+                                cutoutPercentage: 40,
+                                animation: {
+                                    animateScale: true
+                                },
+                                legend: {
+                                    labels: {
+                                        fontColor: 'rgba(220, 220, 220, 1)',
+                                    }
+                                },
+                                tooltips: {
+                                    callbacks: {
+                                        label: function (tooltipItem, data) {
+                                            var label = data.labels[tooltipItem.index] ||
+                                                '';
+
+                                            if (label) {
+                                                label = ' Notu: ' + data.datasets[0].data[
+                                                    tooltipItem.index];
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    xAxes: [{
+                                        ticks: {
+                                            beginAtZero: true
+                                        }
+                                    }]
+                                }
+                            }
+                        }
+                        var myBarChart = new Chart(avarage_quizzes_chart, config);
+                    }
+                });
+            });
+        </script>
+        {% endfor %}
+
+</body>
+
+</html>
