@@ -1,0 +1,1 @@
+web: gunicorn bbalquizzes.wsgi --log-file -
