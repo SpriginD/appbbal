@@ -1,7 +1,0 @@
-{
-    "python.linting.pylintEnabled": false,
-    "python.linting.banditEnabled": false,
-    "python.linting.enabled": false,
-    "python.linting.flake8Enabled": true,
-    "python.pythonPath": "C:\\Users\\EinSh\\AppData\\Local\\Programs\\Python\\Python39\\python.exe"
-}
